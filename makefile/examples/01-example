@@ -1,0 +1,26 @@
+# source : https://www.youtube.com/watch?v=yWLkyN_Satk
+
+# can list all the compiler flags that we will use
+CFLAGS = -Wno-implicit-function-declaration
+
+
+# the target: the dependent commands
+# so if the dependents are not ready then they will be run as defined
+# the commands for target should be tabbed
+final: main.o hello.o
+# 	by default the command as well as the output of the command is 
+# 	printed to the terminal, to not print the command prepend it with @
+	gcc $(CFLAGS) main.o hello.o -o final
+
+main.o:
+	@echo "compiling main"
+	gcc $(CFLAGS) main.c
+
+hello.o:
+	@echo "compiling hello"
+	gcc $(CFLAGS) hello.c
+
+clean:
+	rm main.o hello.o final
+
+

@@ -1,0 +1,29 @@
+# source : https://www.youtube.com/watch?v=DtGrdB8wQ_8
+# the source example is modified to translate the example 01
+
+CC=gcc
+CFLAGS=-Wall -Wextra
+
+SRC_FILES=main.c hello.c
+OBJ_FILES=main.o hello.o
+BINARY=final
+
+all: $(BINARY)
+
+$(BINARY): $(OBJ_FILES)
+	$(CC) -o $@ $^
+
+# this is a make feature
+# % sign is a wildcard, in this context
+# anything.o will depend on same thing (anything).c
+%.o: %.c
+# 	$@ = left hand side of the rule, here: anything.o
+# 	$^ = right hand side of the rule, here: anything.c
+	$(CC) $(CFLAGS) -c  -o $@ $^
+
+clean:
+	rm -rf $(BINARY) $(OBJ_FILES)
+
+# NOTE
+# this makefile has a major flaw that if any c file has a dependency on a .h file and that .h file changes
+# in such case this wont recoganize that there was a change

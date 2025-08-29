@@ -1,0 +1,56 @@
+# source : https://www.youtube.com/watch?v=DtGrdB8wQ_8
+# the source example is modified to translate the example 01
+
+BINARY=final
+SRC_DIRS=. lib
+INCLUDE_DIRS=. ./include/ # can be list
+
+CC=gcc
+# generate files that encode make rules for the .h dependencies
+DEPENDENCY_FLAGS=-MP -MD
+# automatically add the -I onto each include directory
+# the below foreach is like python list comprehension similar to
+# [ f"-I${D}" for D in INCLUDE_DIRS ]
+CFLAGS=-Wall -Wextra -g $(foreach D,$(INCLUDE_DIRS),-I$(D)) $(DEPENDENCY_FLAGS)
+
+# for-style iteration (foreach) and regular expression completions (wildcard)
+# basically for each code directory list of all c files
+# this does not list recursively, ie does not list c files if they are within a dir in this dir
+CFILES=$(foreach D,$(SRC_DIRS),$(wildcard $(D)/*.c))
+
+# regular expression replacement
+# patsubst = pattern substitution
+# for each in CFILES replace the .c with .o
+OBJECTS=$(patsubst %.c,%.o,$(CFILES))
+# for each in CFILES replace the .c with .d
+DEPFILES=$(patsubst %.c,%.d,$(CFILES))
+
+all: $(BINARY)
+
+$(BINARY): $(OBJECTS)
+	$(CC) -o $@ $^
+
+# only want the .c file dependency here, thus $< instead of $^.
+#
+%.o:%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)
+
+# shell commands are a set of keystrokes away
+distribute: clean
+	tar zcvf dist.tgz *
+
+# @ silences the printing of the command
+# $(info ...) prints output
+diff:
+	$(info The status of the repository, and the volume of per-file changes:)
+	@git status
+	@git diff --stat
+
+# include the dependencies
+-include $(DEPFILES)
+
+# add .PHONY so that the non-targetfile - rules work even if a file with the same name exists.
+.PHONY: all clean distribute diff
